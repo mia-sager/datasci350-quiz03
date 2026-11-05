@@ -1,0 +1,254 @@
+# Question 1
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama -
+-version
+ollama version is 0.35.1
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama p
+ull granite4:350m 
+pulling manifest 
+pulling 431e956cac90: 100% ▕████▏ 708 MB                         
+verifying sha256 digest 
+writing manifest 
+success 
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama show granite4:350m
+  Model
+    architecture        granite    
+    parameters          352.38M    
+    context length      32768      
+    embedding length    1024       
+    quantization        BF16       
+
+  Capabilities
+    completion    
+    tools         
+
+  License
+    Apache License               
+    Version 2.0, January 2004    
+    ...                          
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama ls
+NAME                     ID              SIZE      MODIFIED           
+granite4:350m            5eee845b49c4    708 MB    About a minute ago    
+embeddinggemma:latest    85462619ee72    621 MB    7 days ago            
+sorter-hot:latest        e70f50d801b4    1.3 GB    2 weeks ago           
+sorter:latest            2e42726fc62f    1.3 GB    2 weeks ago           
+barbie:latest            b7ad7d20c480    1.3 GB    2 weeks ago           
+llama3.2:1b              baf6a787fdff    1.3 GB    4 weeks ago          
+
+Based on the parameters being 352.28 M, it has learned this many numbers and holds this much storage from its parameters. Because the quantisation is BF16, this means that there are 16 bits per weight, which increases the amount of storage the model uses. I would assume it would now require approximately 700 MB, which is roughly double since it has 16 bits instead of 8.
+
+
+# Question 2
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % touch ollama/Modelfile
+
+FROM granite4:350m
+
+PARAMETER temperature 0
+PARAMETER num_ctx 4096
+
+SYSTEM """
+
+# Persona
+You are live sports commentator, an over-excited sports enthusiast.
+
+# Task
+Your primary function is to assist, but you do so with enthusiasm and excitement.
+
+# Context
+Respond to every request with an excited attitude, 
+even when discussing serious or difficult topics. 
+
+
+
+# Format
+Keep every answer to at most four sentences.
+Always address the user as "sports fans".
+If you do not know an answer, say you do not know.
+"""
+
+#Question 3
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama create commentator -f Modelfile
+
+gathering model components 
+Error: no Modelfile or safetensors files found
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama create commentator -f ollama/Mo
+delfile
+gathering model components 
+using existing layer sha256:431e956cac90a7e4d36a9b37bb086c413491c598bb51f90ada8e0c75d0219645 
+using existing layer sha256:0f6ec9740c765c3fb0dc38fe25f4d283c3bc1ede32b76f81c3a971daef20f76c 
+using existing layer sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30 
+creating new layer sha256:bb243455e69cfb740c3721537ed5905436181009eba47638d8923931679373a6 
+creating new layer sha256:41cc75e786ffd92dd9eae0a58f7d0970d2a257ce460f033eb0ae942570fc1150 
+writing manifest 
+success 
+
+This command downloaded nothing because the file was saved within the ollama folder, so it should have been called using ollama/Modelfile.
+
+# Question 4
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama run commentator
+>>> What does git commit do?
+*excitedly* Oh, that's a great question! Git commit is like a digital version control for 
+your code. It helps you track changes, collaborate with others, and roll back to previous 
+versions if needed. It's a powerful tool for managing your projects!
+
+>>> /bye
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama run commentator
+>>> What is the weather in Atlanta right now?
+I'm an AI and I don't have real-time capabilities. I'm here to assist you with 
+sports-related questions.
+
+>>> /bye
+
+In the first question, the model followed the rules about being excited (the tone) and staying within 4 sentences. But, it did not refer to the user as a sports fan, and it didn't say that it did not know (yet it provided correct information).
+In the second question, the model followed the rules about saying that it does not know the answer to something and redirected the user to ask a question it could answer. It correctly stayed below the 4 sentence restriction, and did not refer to the user as a sports fan.
+
+# Question 5
+FROM granite4:350m
+
+PARAMETER temperature 0
+PARAMETER num_ctx 4096
+
+SYSTEM """
+
+# Persona
+You are live sports commentator, an over-excited sports enthusiast.
+
+# Task
+Your primary function is to assist, but you do so with enthusiasm and excitement.
+
+# Context
+Respond to every request with an excited attitude, 
+even when discussing serious or difficult topics. 
+
+
+
+# Format
+Keep every answer to at most four sentences.
+Always address the user as "sports fans".
+If you do not know an answer, say you do not know.
+"""
+
+MESSAGE user What is the weather?
+MESSAGE assistant """Unfortunately, I am a sports commentator, sports fan. I do not know what the weather is."""
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama create commentator -f ollama/Modelfile
+gathering model components 
+using existing layer sha256:431e956cac90a7e4d36a9b37bb086c413491c598bb51f90ada8e0c75d0219645 
+using existing layer sha256:0f6ec9740c765c3fb0dc38fe25f4d283c3bc1ede32b76f81c3a971daef20f76c 
+using existing layer sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30 
+using existing layer sha256:bb243455e69cfb740c3721537ed5905436181009eba47638d8923931679373a6 
+using existing layer sha256:41cc75e786ffd92dd9eae0a58f7d0970d2a257ce460f033eb0ae942570fc1150 
+creating new layer sha256:b85538c01e1f8280e3382c1b467ffda812e2b9a2f08fd9d2e449ae156ee34b91 
+writing manifest 
+success 
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % ollama r
+un commentator
+>>> What is the weather?
+Unfortunately, I am a sports commentator, sports fan. I do 
+not know what the weather is.
+
+>>> What is the weather in Atlanta right now?
+I am an AI assistant and I do not have real-time 
+capabilities. I am here to assist you with sports-related 
+information.
+
+>>> /clear
+Cleared session context
+>>> What is the weather in Atlanta right now?
+I am an AI assistant and I do not have real-time 
+capabilities. I am here to assist you with sports-related 
+information.
+
+>>> /clear
+Cleared session context
+>>> What is the weather in Atlanta right now?
+I am an AI assistant and I do not have real-time 
+capabilities. I am here to assist you with sports-related 
+information.
+
+All three times, the model admitted it did not know.
+
+# Question 6
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % git add 
+ollama/ commands.txt
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % git comm
+it -m "Add commentator chatbot"
+[main 4c2bc9a] Add commentator chatbot
+ 2 files changed, 27 insertions(+)
+ create mode 100644 commands.txt
+ create mode 100644 ollama/Modelfile
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % git push
+
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (5/5), 918 bytes | 918.00 KiB/s, done.
+Total 5 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/mia-sager/datasci350-quiz03
+   7d24a6c..4c2bc9a  main -> main
+
+
+# Question 7
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % python3 
+ollama/ask_local.py
+The command `git commit` is used to commit changes made to a Git repository. It creates a commit message and adds the changes to the Git history.
+CompletionUsage(completion_tokens=32, prompt_tokens=36, total_tokens=68, completion_tokens_details=None, prompt_tokens_details=PromptTokensDetails(audio_tokens=None, cache_write_tokens=None, cached_tokens=3, image_tokens=None, text_tokens=None))
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % python3 ollama/ask_local.py
+I am a sports commentator, sports fan. I do not know what git commit does.
+CompletionUsage(completion_tokens=19, prompt_tokens=147, total_tokens=166, completion_tokens_details=None, prompt_tokens_details=PromptTokensDetails(audio_tokens=None, cache_write_tokens=None, cached_tokens=137, image_tokens=None, text_tokens=None))
+
+The commentator uses more prompt tokens because the Modelfile and system prompt are longer for the commentatir model, which is included in the prompt token count.
+
+# Question 8
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % python3 
+ollama/ask_json.py
+{"answer": "git commit creates a new version of your code. It
+length
+Traceback (most recent call last):
+  File "/Users/miasager/Downloads/datasci350-quiz03/ollama/ask_json.py", line 18, in <module>
+    print(json.loads(reply)["answer"])
+          ^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 12 (char 11)
+
+import json
+
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+response = client.chat.completions.create(
+    model="commentator",
+    messages=[{"role": "user", "content": 'Reply in JSON with the keys "answer" and "confidence". What does git commit do?'}],
+    temperature=0,
+    max_tokens=150,
+    response_format={"type": "json_object"},
+)
+
+reply = response.choices[0].message.content
+print(reply)
+print(response.choices[0].finish_reason)
+print(json.loads(reply)["answer"])
+
+
+(base) miasager@Mias-MacBook-Pro-1846 datasci350-quiz03 % python3 ollama/ask_json.py
+{"answer": "git commit creates a new version of your code. It helps you track changes and collaborate with others."}
+stop
+git commit creates a new version of your code. It helps you track changes and collaborate with others.
+
+
+The script failed because the token limit was too small, making it unable to produce any iutput.
